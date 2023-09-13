@@ -4122,6 +4122,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ajv@npm:^8.12.0":
+  version: 8.12.0
+  resolution: "ajv@npm:8.12.0"
+  dependencies:
+    fast-deep-equal: ^3.1.1
+    json-schema-traverse: ^1.0.0
+    require-from-string: ^2.0.2
+    uri-js: ^4.2.2
+  checksum: 4dc13714e316e67537c8b31bc063f99a1d9d9a497eb4bbd55191ac0dcd5e4985bbb71570352ad6f1e76684fb6d790928f96ba3b2d4fd6e10024be9612fe3f001
+  languageName: node
+  linkType: hard
+
 "alphanum-sort@npm:^1.0.2":
   version: 1.0.2
   resolution: "alphanum-sort@npm:1.0.2"
@@ -7257,6 +7269,7 @@ __metadata:
     "@testing-library/user-event": ^13.2.1
     "@web3-react/core": ^6.1.9
     "@web3-react/injected-connector": ^6.0.7
+    ajv: ^8.12.0
     axios: ^1.2.5
     dayjs: ^1.11.7
     ethers: ^5.7.2
