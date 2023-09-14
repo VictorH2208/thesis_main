@@ -208,14 +208,19 @@ function IssueCredential() {
         const msgBytes = ethers.utils.arrayify(msgHash) // create binary hash
         const signature = await signer.signMessage(JSON.stringify(unsigned));
         const recoveredPubKey = ethers.utils.recoverPublicKey(msgBytes, signature);
+        const recoverAddress = ethers.utils.recoverAddress(msgBytes, signature);
+        const verifyAddress = ethers.utils.verifyMessage(JSON.stringify(unsigned), signature);
         setPubKey(recoveredPubKey);
 
         const proof = {'proof':{
             "type":"ethereum_personal_sign",
             "created": Date().toLocaleString(),
             "proofPurpose": "assertionMethod",
-            "verificationMethod": recoveredPubKey,
-            "proofValue":signature,
+            "recoveredPubKey": recoveredPubKey,
+            "recoverAddress": recoverAddress,
+            "verifyAddress": verifyAddress,
+            "msgBytes": msgBytes,
+            "signature":signature,
         }}
         const vc = JSON.stringify(Object.assign({}, unsigned, proof));
         setNewCredentialPretty(JSON.stringify(JSON.parse(vc), null, 2))

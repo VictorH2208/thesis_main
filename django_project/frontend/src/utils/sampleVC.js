@@ -1,29 +1,65 @@
 const sampleVC = {
-    "@context": [
-      "https://www.w3.org/2018/credentials/v1",
-      "https://www.w3.org/2018/credentials/examples/v1",
-      "https://w3id.org/security/suites/ed25519-2020/v1"
-    ],
-    "id": 12,
-    "type": [
-      "VerifiableCredential",
-      "UniversityDegreeCredential"
-    ],
-    "issuer": "0x44829A4d92503950F4f39BA5069E8E965FB2e0EB",
-    "issuanceDate": "Fri Aug 04 2023 21:34:59 GMT+0800 (China Standard Time)",
-    "credentialSubject": {
-      "id": "0x44829A4d92503950F4f39BA5069E8E965FB2e0EB",
-      "degree": {
-        "type": "BachelorDegree",
-        "name": "Bachelor of Applied Science"
-      }
-    },
-    "proof": {
-      "type": "ethereum_personal_sign",
-      "created": "Fri Aug 04 2023 21:35:16 GMT+0800 (China Standard Time)",
-      "proofPurpose": "assertionMethod",
-      "verificationMethod": "0x04fc252db78fa700a641c383acd6ed9c2a0ed33bf52737994e771da7a71925a55345b1b98f8cc193e36c0047b40bb6c2a8abf03b3de3a453dd840a74433593ae58",
-      "jws": "0xdb7c1a941911c1fbdd0faba34e0999238d975fbb9cbe54e3dbf5a1c9b7cdd0667b79dce875538fc39c9a20095bf4c5f827059e7b812b5af13e99a63b534ac27b1b"
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://www.w3.org/2018/credentials/examples/v1",
+    "https://w3id.org/security/suites/ed25519-2020/v1"
+  ],
+  "id": 2,
+  "type": [
+    "VerifiableCredential",
+    "UniversityDegreeCredential"
+  ],
+  "issuer": "0xA2400417485b3db7713c86b1da60d719e6493F3E",
+  "issuanceDate": "Wed Sep 13 2023 23:19:52 GMT-0400 (北美东部夏令时间)",
+  "credentialSubject": {
+    "id": "0xA2400417485b3db7713c86b1da60d719e6493F3E",
+    "degree": {
+      "type": "BachelorDegree",
+      "name": "Bachelor of Applied Science"
     }
+  },
+  "proof": {
+    "type": "ethereum_personal_sign",
+    "created": "Wed Sep 13 2023 23:19:57 GMT-0400 (北美东部夏令时间)",
+    "proofPurpose": "assertionMethod",
+    "recoveredPubKey": "0x044e9a83d802e534c4eb6221c28f0938c6d81d48f8af30dc8057ef7d2bc15ba0a2ee42e0e123ad31344e37e2006d4f04f7bbf57985cb013fffe92b80334cdb6822",
+    "recoverAddress": "0xA2400417485b3db7713c86b1da60d719e6493F3E",
+    "verifyAddress": "0xA2400417485b3db7713c86b1da60d719e6493F3E",
+    "msgBytes": {
+      "0": 158,
+      "1": 88,
+      "2": 216,
+      "3": 221,
+      "4": 88,
+      "5": 172,
+      "6": 166,
+      "7": 0,
+      "8": 244,
+      "9": 197,
+      "10": 98,
+      "11": 150,
+      "12": 18,
+      "13": 12,
+      "14": 142,
+      "15": 225,
+      "16": 22,
+      "17": 87,
+      "18": 63,
+      "19": 124,
+      "20": 2,
+      "21": 181,
+      "22": 150,
+      "23": 243,
+      "24": 64,
+      "25": 8,
+      "26": 129,
+      "27": 82,
+      "28": 190,
+      "29": 253,
+      "30": 102,
+      "31": 63
+    },
+    "signature": "0x77ec6326a7e07e709e4e1ae6a3c54f2b403997629f7dbc983e7c68191f21f4113740687971e54274cd2a8d0afa940e415ab9e59806411e866538b72b7055aa851c"
   }
+}
 export default sampleVC;
