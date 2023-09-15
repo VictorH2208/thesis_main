@@ -15,8 +15,10 @@ from django.shortcuts import get_object_or_404
 from api.models import CredentialRequest, VerifiableCredential
 from .utils.utils import *
 from web3 import Web3
-from eth_keys import keys
-from eth_account import Account
+from .utils.vc import *
+from .utils.schema import *
+import jsonschema
+from jsonschema import validate
 
 User = get_user_model()
 
@@ -89,6 +91,14 @@ class VerifyCredentialView(APIView):
         contract,signer,web3 = connectBlockchain();
 
         # schema check
+        try:
+            if isinstance(credential, dict):
+                validate(instance=credential, schema=sampleSchema)
+            else:
+                return HttpResponse("error: the credential is not in json format", status=400)
+        except:
+            return HttpResponse("error: the credential is not valid", status=400)
+
 
 
 
@@ -102,16 +112,23 @@ class VerifyCredentialView(APIView):
 
 
         # connect to the block chain and retrieve info of credential transaction receipt.
-        # signer_of_credential = contract.functions.signerOf(credential["id"]).call();
-        # pubkey_of_credential = contract.functions.pubKeyOf(credential["id"]).call();
-        # if signer_of_credential != credential["issuer"]:
-        #     return JsonResponse({"error": "issuer address does not match the one on the blockchain"}, status=400)
-        # if pubkey_of_credential != credential['proof']['recoveredPubKey']:
-        #     return JsonResponse({"error": "public key does not match the one on the blockchain"}, status=400)
+        signer_of_credential = contract.functions.signerOf(credential["id"]).call();
+        pubkey_of_credential = contract.functions.pubKeyOf(credential["id"]).call();
+        if signer_of_credential != credential["issuer"]:
+            return HttpResponse("error: issuer address does not match the one on the blockchain", status=400)
+        if Web3.to_hex(pubkey_of_credential) != credential['proof']['recoveredPubKey']:
+            return HttpResponse("error: public key does not match the one on the blockchain", status=400)
 
-        # private key and public key check by verifying the signature
+        # # private key and public key check by verifying the signature
+        # proof = credential.pop("proof", None)
+        # recovered_address = Account.recover_message(json.dumps(credential), signature=proof["signature"])
 
-        return HttpResponse()
+
+
+
+
+
+        return HttpResponse("Hello")
 
 
 
