@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, APIView
 from rest_framework.response import Response
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from api.serializer import (GetJWTPairSerializer, RegisterSerializer, IssueTokenSerializer,
             RequestCredentialSerializer, GetCredentialRequestsSerializer, IssueCredentialSerializer, GetNonceSerializer,
             GetVerifiableCredentialsSerializer)
@@ -13,6 +13,10 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from api.models import CredentialRequest, VerifiableCredential
+from .utils.utils import *
+from web3 import Web3
+from eth_keys import keys
+from eth_account import Account
 
 User = get_user_model()
 
@@ -73,6 +77,43 @@ class IssueCredentialView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = IssueCredentialSerializer
     lookup_field = 'id'
+
+class VerifyCredentialView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        nonce = request.data.get("signed_nonce")
+        signed_credential = request.data.get("signed_credential")
+        credential = sampleCredential
+
+        contract,signer,web3 = connectBlockchain();
+
+        # schema check
+
+
+
+        # nounce check and subject user check
+
+
+
+        # Check address correspond to public key
+
+
+
+
+        # connect to the block chain and retrieve info of credential transaction receipt.
+        # signer_of_credential = contract.functions.signerOf(credential["id"]).call();
+        # pubkey_of_credential = contract.functions.pubKeyOf(credential["id"]).call();
+        # if signer_of_credential != credential["issuer"]:
+        #     return JsonResponse({"error": "issuer address does not match the one on the blockchain"}, status=400)
+        # if pubkey_of_credential != credential['proof']['recoveredPubKey']:
+        #     return JsonResponse({"error": "public key does not match the one on the blockchain"}, status=400)
+
+        # private key and public key check by verifying the signature
+
+        return HttpResponse()
+
+
 
 
 @api_view(['GET'])

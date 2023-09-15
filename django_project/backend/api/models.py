@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from .validators import *
 import numpy as np
 from django.contrib.auth.models import UserManager as BaseUserManager
+from .utils.utils import *
 
 # Create your models here.
 class UserManager(BaseUserManager):
@@ -28,9 +29,6 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", False)
         extra_fields.setdefault("is_active", True)
         return self._create_user(publicAddress, **extra_fields)
-
-def random_nonce():
-    return np.floor(np.random.rand()*1000000)
 
 # Create your models here.
 class User(AbstractUser):
