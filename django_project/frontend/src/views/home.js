@@ -8,7 +8,6 @@ const Home = () => {
     return (
         <div className="center">
             <Typography variant="h4" align="center">This is the home page</Typography>
-            {user && <UserInfo user={user} />}
         </div>
     );
 };

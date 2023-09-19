@@ -5,7 +5,7 @@ sampleSchema = {
     "@context": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
       }
     },
     "id": {
@@ -21,7 +21,7 @@ sampleSchema = {
       "type": "string"
     },
     "issuanceDate": {
-      "type": "string"
+      "type": "string",
     },
     "credentialSubject": {
       "type": "object",
@@ -29,17 +29,29 @@ sampleSchema = {
         "id": {
           "type": "string"
         },
-        "degree": {
+        "alumniOf": {
           "type": "object",
           "properties": {
-            "type": {
+            "id": {
               "type": "string"
             },
             "name": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "string"
+                  },
+                  "lang": {
+                    "type": "string"
+                  }
+                },
+                "required": ["value"]
+              }
             }
           },
-          "required": ["type", "name"]
+          "required": ["id"]
         }
       },
       "required": ["id"]
@@ -51,7 +63,7 @@ sampleSchema = {
           "type": "string"
         },
         "created": {
-          "type": "string"
+          "type": "string",
         },
         "proofPurpose": {
           "type": "string"
@@ -63,7 +75,7 @@ sampleSchema = {
           "type": "string"
         }
       },
-      "required": ["type", "created", "proofPurpose"]
+      "required": ["type", "created", "proofPurpose", "verificationMethod", "proofValue"]
     }
   },
   "required": ["@context", "id", "type", "issuer", "issuanceDate", "credentialSubject", "proof"]

@@ -17,8 +17,9 @@ from .utils.utils import *
 from web3 import Web3
 from .utils.vc import *
 from .utils.schema import *
-import jsonschema
 from jsonschema import validate
+from eth_account.messages import encode_defunct
+import json
 
 User = get_user_model()
 
@@ -84,11 +85,9 @@ class VerifyCredentialView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        nonce = request.data.get("signed_nonce")
         signed_credential = request.data.get("signed_credential")
-        credential = sampleCredential
-
-        contract,signer,web3 = connectBlockchain();
+        credential = request.data.get("credential")
+        contract,deployer,web3 = connectBlockchain();
 
         # schema check
         try:
@@ -99,39 +98,52 @@ class VerifyCredentialView(APIView):
         except:
             return HttpResponse("error: the credential is not valid", status=400)
 
+        # subject user check based on signed credential
+        try:
+            verified_address = web3.eth.account.recover_message(encode_defunct(text= json.dumps(credential, separators=(',', ':'), ensure_ascii=False)), 
+                                                                signature=signed_credential)
+            if verified_address != credential["credentialSubject"]["id"]:
+                return HttpResponse("error: you are not the subject of this credential", status=400)
+        except:
+            return HttpResponse("error: the credential is not valid", status=400)
 
-
-
-        # nounce check and subject user check
-
-
+        # Check credential id
 
         # Check address correspond to public key
-
-
-
+        issuer_address = credential["issuer"]
+        try:
+            hash = Web3.keccak(hexstr=credential["proof"]['verificationMethod'][4:])
+            derived_address = Web3.to_checksum_address(Web3.to_hex(hash[-20:]))
+            if derived_address != issuer_address:
+                return HttpResponse("error: the issuer address does not match its public key", status=400)
+        except:
+            return HttpResponse("error: the credential is not valid", status=400)
 
         # connect to the block chain and retrieve info of credential transaction receipt.
-        signer_of_credential = contract.functions.signerOf(credential["id"]).call();
-        pubkey_of_credential = contract.functions.pubKeyOf(credential["id"]).call();
-        if signer_of_credential != credential["issuer"]:
-            return HttpResponse("error: issuer address does not match the one on the blockchain", status=400)
-        if Web3.to_hex(pubkey_of_credential) != credential['proof']['recoveredPubKey']:
-            return HttpResponse("error: public key does not match the one on the blockchain", status=400)
-
-        # # private key and public key check by verifying the signature
-        # proof = credential.pop("proof", None)
-        # recovered_address = Account.recover_message(json.dumps(credential), signature=proof["signature"])
-
+        try:
+            issuer_of_credential = contract.functions.signerOf(credential["id"]).call();
+            pubkey_of_credential = contract.functions.pubKeyOf(credential["id"]).call();
+            if issuer_of_credential != issuer_address:
+                return HttpResponse("error: issuer address does not match the one on the blockchain", status=400)
+            if Web3.to_hex(pubkey_of_credential) != credential['proof']['verificationMethod']:
+                return HttpResponse("error: issuer's public key does not match the one on the blockchain", status=400)
+        except:
+            return HttpResponse("error: the credential is not valid", status=400)
 
 
+        # private key and public key check by verifying the signature
+        try:
+            unsigned_credential = credential.copy()
+            tmp_proof = unsigned_credential.pop("proof", None)
+            message = encode_defunct(text= json.dumps(unsigned_credential, separators=(',', ':'), ensure_ascii=False))
+            signature = tmp_proof['proofValue']
+            verified_address = web3.eth.account.recover_message(message, signature=signature)
+            if verified_address != issuer_address:
+                return HttpResponse("error: the issuer signature does not match the public key", status=400)
+        except:
+            return HttpResponse("error: the credential is not valid", status=400)
 
-
-
-        return HttpResponse("Hello")
-
-
-
+        return HttpResponse("Success", status=200)
 
 @api_view(['GET'])
 def getRoutes(request):

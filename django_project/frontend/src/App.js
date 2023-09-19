@@ -20,7 +20,7 @@ function App() {
                     <Route exact component={Home} path="/" />
                     <PrivateRoute component={DashBoard} path="/dashboard" exact />
                     <PrivateRoute component={IssueCredential} path="/issue-credential" exact />
-                    <PrivateRoute component={VerifyCredential} path="/verify-credential" exact />
+                    <Route component={VerifyCredential} path="/verify-credential" exact />
                 </Switch>
             </AuthProvider>
         </div>

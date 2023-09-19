@@ -102,9 +102,15 @@ function ResponsiveAppBar() {
                                     Verify Credential
                                 </Link>
                             </> : 
-                            <Link to="/" className={classes.link}>
-                                Home
-                            </Link> }
+                            <>
+                                <Link to="/" className={classes.link}>
+                                    Home
+                                </Link>
+                                <Link to="/verify-credential" className={classes.link}>
+                                    Verify Credential
+                                </Link> 
+                            </>
+                        }
                     </div>
                     <IconButton edge="end" aria-controls={menuId} aria-label="account of current user" aria-haspopup="true" onClick={handleProfileMenuOpen} color="inherit">
                         <AccountCircle />

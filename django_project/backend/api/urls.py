@@ -17,7 +17,7 @@ urlpatterns = [
     path('credential/request/list/<int:id>',views.GetCredentialRequestsView.as_view(),name='get_credential_requests'),
     path('credential/issue/<int:id>',views.IssueCredentialView.as_view(),name='issue_credential'),
     path('credential/list/<int:id>',views.GetVerifiableCredentialsView.as_view(),name='get_verifiable_credentials'),
-    path('credential/verify',views.VerifyCredentialView.as_view(),name='verify_credential'),
+    path('credential/verify/',views.VerifyCredentialView.as_view(),name='verify_credential'),
     path('test/', views.testEndPoint, name='test'),
     path('', views.getRoutes)
 ]

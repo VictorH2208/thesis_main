@@ -77,7 +77,6 @@ class IssueTokenSerializer(serializers.ModelSerializer):
             web3.eth.wait_for_transaction_receipt(tx_issue)
         except:
             exists_ = True
-            print("hahaha " + exists_)
             raise ValidationError
         if not exists_:
             newtoken = contract.functions.tokenOf(instance.publicAddress).call()
@@ -108,7 +107,7 @@ class IssueCredentialSerializer(serializers.ModelSerializer):
             user = request.user
         hash = Web3.keccak(hexstr=validated_data['pubKey'][4:])
         PA = Web3.to_checksum_address(Web3.to_hex(hash[-20:]))
-        print(PA,user.publicAddress)
+        print("What the fuck:", PA, user.publicAddress)
         if PA != user.publicAddress:
             raise ValidationError
         try:
@@ -152,7 +151,6 @@ class RequestCredentialSerializer(serializers.ModelSerializer):
 
     def validate(slf,attrs):
         data = attrs.copy()
-        #data['issuerAddress'] = User.objects.get(name=data['issuer']).publicAddress
         data['issuerAddress'] = User.objects.get(id=1).publicAddress
         data['issuer'] = User.objects.get(publicAddress=data['issuerAddress'])
         data['target'] = User.objects.get(id=data['userId'])

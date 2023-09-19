@@ -1,13 +1,16 @@
 import { useState, useEffect, useContext } from "react";
 import AuthContext from "../context/AuthContext";
+import useAxios from "../hooks/useAxios";
 import sampleSchema from "../utils/schema";
 import sampleVC from "../utils/sampleVC";
 import Ajv from "ajv";
+import axios from "axios";
 import { Container, Typography, Input,
     Button, Grid, Modal, makeStyles, 
     Collapse, Table, TableBody, 
     TableCell, TableContainer, TableHead,
     TableRow, Paper, TablePagination} from "@material-ui/core";
+import Alert from "@material-ui/lab/Alert";
 
 const TokenArtifact = require("../artifacts/contracts/IDToken/IDToken.json");
 const contractAddress = require("../artifacts/contracts/IDToken/contract-address.json");
@@ -17,28 +20,33 @@ const ajv = new Ajv();
 const validate = ajv.compile(sampleSchema);
 
 const VerifyCredential = () => {
-    const { authTokens, user } = useContext(AuthContext);
+
     const [selectedFile, setSelectedFile] = useState();
     const [credential, setCredential] = useState();
 	const [isSelected, setIsSelected] = useState(false);
     const [msg, setMsg] = useState("");
 
-	const changeHandler = (event) => {
-        var file = event.target.files[0];
+    useEffect(() => {
+        if (selectedFile !== undefined) {
+            try {setCredential(JSON.parse(selectedFile)); }
+            catch {setMsg("Error: The credential is invalid")}
+        }
+    }, [selectedFile]);
 
+
+	const changeHandler = async (event) => {
+        var file = event.target.files[0];
 		setIsSelected(true);
         var reader = new FileReader();
-        reader.onload = function (event) {
-            setSelectedFile(event.target.result);
-        };
+        reader.onloadend = () => {
+            setSelectedFile(reader.result);
+          };
         reader.readAsText(file);
 	};
 
     const checkCredentialFormat = async (e, request) => {
         try {
-            setCredential(JSON.parse(selectedFile));
             const valid = validate(credential);
-    
             if (valid) {
                 return true;
             } else {
@@ -52,56 +60,43 @@ const VerifyCredential = () => {
 	};
 
 	const handleSubmission = async (e, request) => {
-
         // Check schema validity (possible sync issue first time not working)
-        // const isValid = await checkCredentialFormat();
-        // if (!isValid) {
-        //     setMsg('Error: The credential is not valid');
-        //     console.log("shit 1")
-        //     return;
-        // }
-
-        setCredential(sampleVC);
-
-        console.log("verifying credential")
+        const isValid = await checkCredentialFormat();
+        if (!isValid) {
+            setMsg('Error: The credential is invalid');
+            console.log("shit 1")
+            return;
+        }
 
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const [address] = await window.ethereum.request({method:'eth_requestAccounts'});
         const signer = provider.getSigner(address);
-        //Check if credential subject is the same as the current user
-        const current_user_address = await signer.getAddress();
-        if (credential.credentialSubject.id !== current_user_address) {
-            setMsg('Error: The current user does not match the credential subject');
-            console.log(msg);
-            return;
-        }
+        const signed_credential = await signer.signMessage(JSON.stringify(credential));
 
-        //compute the address using pubkey
-        const addressFromPublicKey = ethers.utils.computeAddress(credential.proof.recoveredPubKey);
-        if (credential.issuer !== addressFromPublicKey) {
-            setMsg('Error: The issuer did not sign this proof.');
-            console.log(msg);
-            return;
-        }
-
-        //Connecting to contract and retrieve pubkey and address
-        // const contract = new ethers.Contract(contractAddress, TokenArtifact.abi, provider.getSigner(contractAddress.Deployer));
-        // try {
-        //     const signerAddress = await contract.signerOf(1);
-        //     console.log("Signer of the credential:", signerAddress);
-        // } catch (error) {
-        //     console.error("Error calling 'signerOf' function:", error);
-        // }
-
-        //Verify privateKey and publicKey matches
-        const unsigned = JSON.parse(JSON.stringify(credential));
-        delete unsigned.proof;
-        const addressFromMsg = ethers.utils.verifyMessage(JSON.stringify(unsigned), credential.proof.signature);
-        if (addressFromMsg !== credential.issuer) {
-            setMsg('Error: The private key does not match the signature');
-            console.log(msg);
-            return;
-        }
+        const url = 'http://127.0.0.1:8000/api/credential/verify/';
+        const data = {
+          // no longer needed if using TLS, still vulnerable if someone intercepts signed credential on the client side (before TLS)
+          // signed_nonce: nonce, 
+          signed_credential: signed_credential,
+          credential: credential,
+        };
+        
+        const headers = {
+          "Content-Type": "application/json",
+        };
+        
+        axios.post(url, data, { headers })
+            .then(response => {
+                if (response.status === 200) {
+                setMsg('Success: Valid Credential');
+                } else {
+                setMsg('Error: The credential is invalid');
+                }
+            })
+            .catch(error => {
+                setMsg('Error: there are invalid values in its attributes');
+            });
+        
 	};
 
     return (
@@ -115,6 +110,11 @@ const VerifyCredential = () => {
                 <Grid item xs={12} style={{ marginTop: 30}} align="center">
                     <Input type="file" color="primary" onChange={changeHandler} />
                 </Grid>
+                <Grid item xs={12} align="center">
+                    <Collapse in={msg !== ''}>
+                        {!(msg.includes("Error")) ? (<Alert severity="success" onClose={() => {setMsg('')}}>{msg}</Alert>) : (<Alert severity="error" onClose={() => {setMsg('')}}>{msg}</Alert>)}
+                    </Collapse>
+                </Grid>
                 <Grid item xs={12}>
                     {isSelected ? (
                         <div>
@@ -123,11 +123,10 @@ const VerifyCredential = () => {
                     ) : (<div></div>)}
                 </Grid>
                 <Grid item xs={12} align="center">
-                    <Button variant="contained" color="primary" onClick={handleSubmission}>
+                    <Button variant="contained" color="primary" disabled={!isSelected} onClick={handleSubmission}>
                         Verify
                     </Button>
                 </Grid>
-
             </Grid>
         </Container>
     );
